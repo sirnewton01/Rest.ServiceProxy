@@ -58,14 +58,15 @@ namespace Rest.ServiceProxy
         }
 
         /// <summary>
-        /// Validates all controller classes in an assembly against
+        /// Validates all controller classes in the provided enumberble
+        ///  (ie. from an assembly.GetTypes() call) for
         ///  their service interfaces checking for any discrepancies.
         /// Discrepancies are reported as exceptions allowing one to hook
         ///  this into the server startup or unit testing to catch problems.
         /// </summary>
-        public static void ValidateControllers(Assembly a)
+        public static void ValidateControllers(IEnumerable<Type> types)
         {
-            foreach (Type t in a.GetTypes())
+            foreach (Type t in types)
             {
                 if (t.IsClass && t.BaseType.Equals(typeof(Controller)))
                 {
