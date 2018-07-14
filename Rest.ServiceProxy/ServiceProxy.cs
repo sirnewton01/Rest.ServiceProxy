@@ -71,18 +71,18 @@ namespace Rest.ServiceProxy
                 {
                     foreach (Type i in t.GetInterfaces())
                     {
-                        IEnumerable<RouteAttribute> iRouteAttributes = i.GetCustomAttributes<RouteAttribute>();
-                        IEnumerable<RouteAttribute> tRouteAttributes = t.GetCustomAttributes<RouteAttribute>();
+                        IEnumerable<Microsoft.AspNetCore.Mvc.RouteAttribute> iRouteAttributes = i.GetCustomAttributes<Microsoft.AspNetCore.Mvc.RouteAttribute>();
+                        IEnumerable<Microsoft.AspNetCore.Mvc.RouteAttribute> tRouteAttributes = t.GetCustomAttributes<Microsoft.AspNetCore.Mvc.RouteAttribute>();
 
                         if (iRouteAttributes.Count() > tRouteAttributes.Count())
                         {
                             throw new Exception("In controller " + t.FullName + " the number of [Route] custom attributes doesn't match the interface " + i.FullName);
                         }
 
-                        foreach (RouteAttribute route1 in iRouteAttributes)
+                        foreach (Microsoft.AspNetCore.Mvc.RouteAttribute route1 in iRouteAttributes)
                         {
                             bool matched = false;
-                            foreach (RouteAttribute route2 in t.GetCustomAttributes<RouteAttribute>())
+                            foreach (Microsoft.AspNetCore.Mvc.RouteAttribute route2 in tRouteAttributes)
                             {
                                 if (Object.Equals(route1.Template, route2.Template)
                                     && route1.Order == route2.Order
@@ -106,18 +106,18 @@ namespace Rest.ServiceProxy
                             MethodInfo m1 = mapping.InterfaceMethods[idx];
                             MethodInfo m2 = mapping.TargetMethods[idx];
 
-                            var m1RouteAttributes = m1.GetCustomAttributes<RouteAttribute>();
-                            var m2RouteAttributes = m2.GetCustomAttributes<RouteAttribute>();
+                            var m1RouteAttributes = m1.GetCustomAttributes<Microsoft.AspNetCore.Mvc.RouteAttribute>();
+                            var m2RouteAttributes = m2.GetCustomAttributes<Microsoft.AspNetCore.Mvc.RouteAttribute>();
 
                             if (m1RouteAttributes.Count() > m2RouteAttributes.Count())
                             {
                                 throw new Exception("In controller " + t.FullName + " on method " + m2 + " there is a mismatch on the number of [Route] attributes on interface " + i.FullName);
                             }
 
-                            foreach(RouteAttribute route1 in m1RouteAttributes)
+                            foreach(Microsoft.AspNetCore.Mvc.RouteAttribute route1 in m1RouteAttributes)
                             {
                                 bool matched = false;
-                                foreach(RouteAttribute route2 in m2RouteAttributes)
+                                foreach(Microsoft.AspNetCore.Mvc.RouteAttribute route2 in m2RouteAttributes)
                                 {
                                     if (Object.Equals(route1.Template, route2.Template)
                                         && route1.Order == route2.Order
@@ -201,9 +201,9 @@ namespace Rest.ServiceProxy
 
             foreach (object a in targetMethod.DeclaringType.GetCustomAttributes())
             {
-                if (a is RouteAttribute)
+                if (a is Microsoft.AspNetCore.Mvc.RouteAttribute)
                 {
-                    uri = uri + "/" + ((RouteAttribute)a).Template;
+                    uri = uri + "/" + ((Microsoft.AspNetCore.Mvc.RouteAttribute)a).Template;
                     break;
                 }
             }
