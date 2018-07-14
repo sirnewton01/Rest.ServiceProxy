@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Chris McGee</Authors>
+    <PackageProjectUrl>https://github.com/sirnewton01/Rest.ServiceProxy</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/sirnewton01/Rest.ServiceProxy/blob/master/LICENSE</PackageLicenseUrl>
+    <Copyright>2018 Chris McGee</Copyright>
+    <Description>C# ASP.Net Core library for creating REST client services from C# interfaces and ASP.Net Web API annotations. For more details check out the project page. https://github.com/sirnewton01/Rest.ServiceProxy</Description>
   </PropertyGroup>
 
   <ItemGroup>
