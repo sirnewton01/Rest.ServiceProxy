@@ -39,7 +39,7 @@ namespace Rest.ServiceProxy
     /// <typeparam name="T">The interface type for the proxy</typeparam>
     public class ServiceProxy<T> : DispatchProxy
     {
-        private HttpClient client;
+        private HttpMessageInvoker client;
         private string uri_base;
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace Rest.ServiceProxy
         ///  It is recommended that all services use the same HTTP client
         ///  to improve performance.
         /// </summary>
-        public static T Create(HttpClient c, string u)
+        public static T Create(HttpMessageInvoker c, string u)
         {
             object proxy = Create<T, ServiceProxy<T>>();
             ((ServiceProxy.ServiceProxy<T>)proxy).client = c;
@@ -208,29 +208,26 @@ namespace Rest.ServiceProxy
                     break;
                 }
             }
-            
-            bool get = false;
-            bool put = false;
-            bool post = false;
-            bool delete = false;
+
+            HttpMethod method = null;
 
             foreach (object a in targetMethod.GetCustomAttributes())
             {
-                if (a is HttpGetAttribute)
+                if (targetMethod.Name.StartsWith("Get") || a is HttpGetAttribute)
                 {
-                    get = true;
+                    method = HttpMethod.Get;
                 }
-                else if (a is HttpPutAttribute)
+                else if (targetMethod.Name.StartsWith("Put") || a is HttpPutAttribute)
                 {
-                    put = true;
+                    method = HttpMethod.Put;
                 }
-                else if (a is HttpPostAttribute)
+                else if (targetMethod.Name.StartsWith("Post") || a is HttpPostAttribute)
                 {
-                    post = true;
+                    method = HttpMethod.Post;
                 }
-                else if (a is HttpDeleteAttribute)
+                else if (targetMethod.Name.StartsWith("Delete") || a is HttpDeleteAttribute)
                 {
-                    delete = true;
+                    method = HttpMethod.Delete;
                 }
 
                 if (a is HttpMethodAttribute)
@@ -248,7 +245,7 @@ namespace Rest.ServiceProxy
             int idx = 0;
             foreach (ParameterInfo p in targetMethod.GetParameters())
             {
-                // Identify the form body, if any
+                // Identify the from body, if any
                 foreach (object a in p.GetCustomAttributes())
                 {
                     if (a is FromBodyAttribute)
@@ -285,22 +282,17 @@ namespace Rest.ServiceProxy
                 requestContent = new StringContent(new StreamReader(stream).ReadToEnd(), System.Text.Encoding.UTF8, "application/json");
             }
 
-            if (targetMethod.Name.StartsWith("Get") || get)
+            if (method == null)
             {
-                response = client.GetAsync(uri).Result;
+                throw new Exception("The method is not a valid MVC method. The HTTP method could not be discovered. Did you put the right [HttpGet/Put/Post/Delete] attribute on it?");
             }
-            else if (targetMethod.Name.StartsWith("Post") || post)
+
+            if (uri.Equals(uri_base))
             {
-                response = client.PostAsync(uri, requestContent).Result;
+                throw new Exception("The method is not a valid MVC method. Did you put put a [Route] attribute on the interface and did you put an [HttpGet/Put/Post/Delete] attribute on the method?");
             }
-            else if (targetMethod.Name.StartsWith("Put") || put)
-            {
-                response = client.PutAsync(uri, requestContent).Result;
-            }
-            else if (targetMethod.Name.StartsWith("Delete") || delete)
-            {
-                response = client.DeleteAsync(uri).Result;
-            }
+
+            response = client.SendAsync(new HttpRequestMessage(method, uri), new System.Threading.CancellationToken(false)).Result;
 
             foreach (object a in targetMethod.GetCustomAttributes())
             {
